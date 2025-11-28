@@ -1,9 +1,13 @@
 "use client";
 import React from 'react';
-import Dashboard from '@/components/Dashboard';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Code, MessageSquare, Activity, ArrowRight } from 'lucide-react';
+import Container from '@/components/Container';
+import { TypewriterEffectSmooth } from '@/components/ui/typewriter-effect';
+import { BackgroundRippleEffect } from '@/components/ui/background-ripple-effect';
+import { CardSpotlight } from '@/components/ui/card-spotlight';
+import { NoiseBackground } from '@/components/ui/noise-background';
 
 export default function Home() {
   const container = {
@@ -21,84 +25,135 @@ export default function Home() {
     show: { opacity: 1, y: 0 }
   };
 
+  const words = [
+    {
+      text: "Master",
+      className: "text-muted-foreground",
+    },
+    {
+      text: "the",
+      className: "text-muted-foreground",
+    },
+    {
+      text: "Technical",
+      className: "text-muted-foreground",
+    },
+    {
+      text: "Interview.",
+      className: "text-white",
+    },
+  ];
+
   return (
-    <div className="space-y-12">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center md:text-left border-b border-[var(--border-color)] pb-8"
-      >
-        <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-6 tracking-tight">
-          Welcome to Outerview
-        </h1>
-        <p className="text-gray-400 text-xl max-w-3xl leading-relaxed font-light">
-          Master your technical interview skills with AI-powered practice sessions, real-time feedback, and comprehensive analytics.
-        </p>
-      </motion.div>
+    <Container className='shadow-lg shadow-white '>
+      <div className="space-y-20 py-10">
+        {/* Hero Section with Ripple Effect */}
+        <div className="relative min-h-[500px] flex flex-col items-center justify-center rounded-3xl overflow-hidden border border-white/5 bg-black/50">
+          <BackgroundRippleEffect />
+          <div className="relative z-10 p-8 flex flex-col items-center text-center space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex flex-col items-center space-y-6"
+            >
+              <TypewriterEffectSmooth words={words} />
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
-        <Dashboard />
-      </motion.div>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+                Elevate your coding and communication skills with AI-powered practice sessions.
+                Sleek, focused, and effective.
+              </p>
 
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
-      >
-        <motion.div variants={item}>
-          <Link href="/coding" className="block h-full p-8 glass-card rounded-xl hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <div className="w-14 h-14 bg-blue-900/30 border border-blue-500/30 rounded-xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Code size={28} />
+              <div className="flex flex-col sm:flex-row justify-center gap-6 pt-8">
+                <NoiseBackground
+                  containerClassName="rounded-full p-1"
+                  gradientColors={["#3b82f6", "#8b5cf6", "#ec4899"]}
+                  noiseIntensity={0.1}
+                >
+                  <Link href="/coding" className="block px-8 py-3 bg-white text-black font-medium rounded-full hover:bg-gray-200 transition-colors">
+                    Start Coding
+                  </Link>
+                </NoiseBackground>
+
+                <NoiseBackground
+                  containerClassName="rounded-full p-1"
+                  gradientColors={["#10b981", "#3b82f6", "#8b5cf6"]}
+                  noiseIntensity={0.1}
+                >
+                  <Link href="/communication" className="block px-8 py-3 bg-black text-white border border-white/20 font-medium rounded-full hover:bg-white/10 transition-colors">
+                    Practice Talk
+                  </Link>
+                </NoiseBackground>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors">Coding Practice</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">Solve algorithmic problems with automated test validation and AI feedback.</p>
-              <div className="flex items-center text-blue-400 text-sm font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
-                Start Practice <ArrowRight size={16} className="ml-2" />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          <motion.div variants={item} className="md:col-span-2">
+            <CardSpotlight className="h-full p-8 border-white/5 bg-black/40">
+              <div className="relative z-20 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 text-white">
+                    <Activity size={24} />
+                    <h3 className="text-2xl font-semibold tracking-tight">Your Dashboard</h3>
+                  </div>
+                  <p className="text-muted-foreground max-w-md">
+                    Track your progress, view detailed analytics, and identify areas for improvement with our comprehensive dashboard.
+                  </p>
+                </div>
+                <Link href="/dashboard" className="group flex items-center gap-2 text-white font-medium hover:text-muted-foreground transition-colors">
+                  Go to Dashboard <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
               </div>
-            </div>
-          </Link>
+            </CardSpotlight>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Link href="/coding" className="block h-full">
+              <CardSpotlight className="h-full p-8 border-white/5 bg-black/40 group">
+                <div className="relative z-20">
+                  <div className="mb-6 text-white group-hover:scale-110 transition-transform duration-300">
+                    <Code size={32} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">Coding Practice</h3>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    Solve algorithmic problems with automated test validation and AI feedback.
+                  </p>
+                  <div className="flex items-center text-white text-sm font-medium opacity-60 group-hover:opacity-100 transition-opacity">
+                    Start Practice <ArrowRight size={16} className="ml-2" />
+                  </div>
+                </div>
+              </CardSpotlight>
+            </Link>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Link href="/communication" className="block h-full">
+              <CardSpotlight className="h-full p-8 border-white/5 bg-black/40 group">
+                <div className="relative z-20">
+                  <div className="mb-6 text-white group-hover:scale-110 transition-transform duration-300">
+                    <MessageSquare size={32} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">Communication</h3>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    Practice behavioral questions with real-time speech analysis and face detection.
+                  </p>
+                  <div className="flex items-center text-white text-sm font-medium opacity-60 group-hover:opacity-100 transition-opacity">
+                    Start Session <ArrowRight size={16} className="ml-2" />
+                  </div>
+                </div>
+              </CardSpotlight>
+            </Link>
+          </motion.div>
         </motion.div>
-
-        <motion.div variants={item}>
-          <Link href="/communication" className="block h-full p-8 glass-card rounded-xl hover:border-green-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <div className="w-14 h-14 bg-green-900/30 border border-green-500/30 rounded-xl flex items-center justify-center mb-6 text-green-400 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <MessageSquare size={28} />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-green-300 transition-colors">Communication</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">Practice behavioral questions with real-time speech analysis and face detection.</p>
-              <div className="flex items-center text-green-400 text-sm font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
-                Start Session <ArrowRight size={16} className="ml-2" />
-              </div>
-            </div>
-          </Link>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Link href="/feedback" className="block h-full p-8 glass-card rounded-xl hover:border-purple-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <div className="w-14 h-14 bg-purple-900/30 border border-purple-500/30 rounded-xl flex items-center justify-center mb-6 text-purple-400 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Activity size={28} />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors">Get Feedback</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">View detailed performance analytics and AI-powered insights.</p>
-              <div className="flex items-center text-purple-400 text-sm font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
-                View Insights <ArrowRight size={16} className="ml-2" />
-              </div>
-            </div>
-          </Link>
-        </motion.div>
-      </motion.div>
-    </div>
+      </div>
+    </Container>
   );
 }

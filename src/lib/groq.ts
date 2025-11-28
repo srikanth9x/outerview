@@ -1,12 +1,19 @@
 "use server";
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY,
-});
+const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+
+const groq = apiKey ? new Groq({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true
+}) : null;
 
 export const getGroqFeedback = async (code: string, context?: string) => {
     try {
+        if (!groq) {
+            return "Groq API key is missing. Please add it to your environment variables.";
+        }
+
         const prompt = context
             ? `${context}\n\nCode:\n${code}\n\nProvide constructive feedback on this code solution. Focus on correctness, efficiency, and code style.`
             : `Review this code and provide constructive feedback:\n\n${code}`;
@@ -22,7 +29,7 @@ export const getGroqFeedback = async (code: string, context?: string) => {
                     content: prompt
                 }
             ],
-            model: "llama3-8b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.5,
             max_tokens: 1024,
         });
@@ -30,13 +37,17 @@ export const getGroqFeedback = async (code: string, context?: string) => {
         return completion.choices[0]?.message?.content || "No feedback generated.";
     } catch (error) {
         console.error("Error getting Groq feedback:", error);
-        // Return a user-friendly error string instead of throwing, to avoid exposing server errors directly
         return "Error generating feedback. Please check your API key and try again.";
     }
 };
 
 export const generateProblem = async (difficulty: 'Easy' | 'Medium' | 'Hard') => {
     try {
+        if (!groq) {
+            console.warn("Groq API key missing, skipping AI generation.");
+            return null;
+        }
+
         const prompt = `Generate a unique coding problem for a technical interview.
 Difficulty: ${difficulty}
 Return ONLY a valid JSON object with the following structure:
@@ -72,7 +83,7 @@ Ensure the JSON is valid and contains no markdown formatting outside the string 
                     content: prompt
                 }
             ],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.7,
             response_format: { type: "json_object" }
         });

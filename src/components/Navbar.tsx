@@ -1,68 +1,74 @@
-"use client";
-import React from 'react';
+'use client';
+
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Code, MessageSquare, Activity, Home } from 'lucide-react';
-import clsx from 'clsx';
 import { motion } from 'framer-motion';
+import { usePathname, useRouter } from 'next/navigation';
+import { BorderBeam } from '@/components/ui/border-beam';
+import { useState } from 'react';
+
+const navItems = [
+    { name: 'Coding', path: '/coding' },
+    { name: 'Communication', path: '/communication' },
+];
 
 export default function Navbar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
-    const navItems = [
-        { href: '/', label: 'Dashboard', icon: <Home size={18} /> },
-        { href: '/coding', label: 'Coding', icon: <Code size={18} /> },
-        { href: '/communication', label: 'Communication', icon: <MessageSquare size={18} /> },
-        { href: '/feedback', label: 'Feedback', icon: <Activity size={18} /> },
-    ];
+    const handlePracticeClick = async () => {
+        setIsLoadingProblem(true);
+        try {
+            const response = await fetch('https://alfa-leetcode-api.onrender.com/problems?limit=100');
+            const data = await response.json();
+            if (data.problemsetQuestionList && data.problemsetQuestionList.length > 0) {
+                const randomIndex = Math.floor(Math.random() * data.problemsetQuestionList.length);
+                const randomSlug = data.problemsetQuestionList[randomIndex].titleSlug;
+                router.push(`/coding/${randomSlug}`);
+            }
+        } catch (error) {
+            console.error('Error fetching random problem:', error);
+        } finally {
+            setIsLoadingProblem(false);
+        }
+    };
 
     return (
-        <nav className="sticky top-0 z-50 border-b border-[var(--border-color)] bg-gray-900/80 backdrop-blur-md">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
-                            O
-                        </div>
-                        <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                            Outerview
-                        </span>
-                    </div>
+        <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 pointer-events-none">
+            <motion.nav
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="glass-nav relative px-8 py-4 rounded-full pointer-events-auto flex items-center gap-8 overflow-hidden"
+            >
+                <BorderBeam size={250} duration={12} delay={9} />
 
-                    <div className="flex items-center gap-1">
-                        {navItems.map((item) => {
-                            const isActive = pathname === item.href;
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={clsx(
-                                        "relative px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 group",
-                                        isActive
-                                            ? "text-white bg-gray-800/50 border border-[var(--border-color)]"
-                                            : "text-gray-400 hover:text-white hover:bg-gray-800/30 border border-transparent hover:border-[var(--border-color)]"
-                                    )}
-                                >
-                                    <span className={clsx(
-                                        "transition-colors duration-200",
-                                        isActive ? "text-blue-400" : "text-gray-500 group-hover:text-blue-400"
-                                    )}>
-                                        {item.icon}
-                                    </span>
-                                    {item.label}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="navbar-indicator"
-                                            className="absolute inset-0 rounded-md bg-gray-800/50 border border-[var(--border-color)] -z-10"
-                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                        />
-                                    )}
-                                </Link>
-                            );
-                        })}
-                    </div>
+                <Link href="/" className="text-xl font-bold tracking-tighter hover:text-muted-foreground transition-colors relative z-10">
+                    outerview
+                </Link>
+
+                <div className="h-4 w-[1px] bg-white/10 relative z-10" />
+
+                <div className="flex items-center gap-6 relative z-10">
+                    <button
+                        onClick={handlePracticeClick}
+                        disabled={isLoadingProblem}
+                        className="text-sm font-medium transition-colors hover:text-white text-muted-foreground disabled:opacity-50"
+                    >
+                        {isLoadingProblem ? 'Loading...' : 'Practice'}
+                    </button>
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.path}
+                            href={item.path}
+                            className={`text-sm font-medium transition-colors hover:text-white ${pathname === item.path ? 'text-white' : 'text-muted-foreground'
+                                }`}
+                        >
+                            {item.name}
+                        </Link>
+                    ))}
                 </div>
-            </div>
-        </nav>
+            </motion.nav>
+        </div>
     );
 }
