@@ -18,6 +18,7 @@ export interface CommunicationSession {
     duration: number; // seconds
     timestamp: number;
     feedbackScore?: number; // 0-100, optional AI-generated score
+    answerAccuracy?: number; // 0-100, AI evaluation of answer quality
 }
 
 const CODING_STORAGE_KEY = 'outerview_sessions';
@@ -126,10 +127,17 @@ export function getDashboardMetrics() {
         ? Math.round(sessionsWithFeedback.reduce((sum, s) => sum + (s.feedbackScore || 0), 0) / sessionsWithFeedback.length)
         : 0;
 
+    // 4. Answer Accuracy - average answer quality score
+    const sessionsWithAccuracy = commSessions.filter(s => s.answerAccuracy !== undefined);
+    const answerAccuracy = sessionsWithAccuracy.length > 0
+        ? Math.round(sessionsWithAccuracy.reduce((sum, s) => sum + (s.answerAccuracy || 0), 0) / sessionsWithAccuracy.length)
+        : 0;
+
     return {
         codeAccuracy,
         confidenceLevel,
         communicationScore,
+        answerAccuracy,
         totalCodingSessions: codingSessions.length,
         totalCommunicationSessions: commSessions.length,
     };

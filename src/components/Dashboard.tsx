@@ -32,6 +32,7 @@ export default function Dashboard({ stats: propStats }: DashboardProps) {
         codeAccuracy: 0,
         confidenceLevel: 0,
         communicationScore: 0,
+        answerAccuracy: 0,
         totalCodingSessions: 0,
         totalCommunicationSessions: 0
     };
@@ -73,6 +74,18 @@ export default function Dashboard({ stats: propStats }: DashboardProps) {
             hoverBorder: 'group-hover:border-purple-500/50',
             description: 'AI feedback quality rating',
             progressColor: 'bg-purple-500'
+        },
+        {
+            label: 'Answer Accuracy',
+            value: `${metrics.answerAccuracy}%`,
+            rawValue: metrics.answerAccuracy,
+            icon: <Award size={28} />,
+            color: 'from-orange-500 to-orange-600',
+            bgColor: 'bg-orange-900/10',
+            borderColor: 'border-orange-500/20',
+            hoverBorder: 'group-hover:border-orange-500/50',
+            description: 'AI-evaluated answer quality',
+            progressColor: 'bg-orange-500'
         }
     ];
 
@@ -88,7 +101,7 @@ export default function Dashboard({ stats: propStats }: DashboardProps) {
     return (
         <div className="space-y-8">
             {/* Main Metrics - Large Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {mainMetrics.map((metric, index) => {
                     const gradeInfo = getScoreGrade(metric.rawValue);
                     return (
