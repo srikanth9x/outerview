@@ -68,14 +68,19 @@ export const useSpeechToText = () => {
     }, []);
 
     const startListening = () => {
+        if (isListening) return;
         if (recognitionRef.current) {
             try {
                 setError(null);
                 recognitionRef.current.start();
                 setIsListening(true);
-            } catch (err) {
-                console.error('Error starting recognition:', err);
-                setError('Failed to start recording. Please try again.');
+            } catch (err: any) {
+                if (err.name === 'InvalidStateError' || err.message?.includes('already started')) {
+                    setIsListening(true);
+                } else {
+                    console.error('Error starting recognition:', err);
+                    setError('Failed to start recording. Please try again.');
+                }
             }
         } else {
             setError('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
