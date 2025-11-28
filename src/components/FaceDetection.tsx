@@ -73,7 +73,7 @@ export default function FaceDetection() {
     };
 
     const detectFaces = () => {
-        if (!videoRef.current || !canvasRef.current || !detectorRef.current || !isActive) {
+        if (!videoRef.current || !canvasRef.current || !detectorRef.current) {
             return;
         }
 
@@ -89,11 +89,13 @@ export default function FaceDetection() {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
-        const startTimeMs = performance.now();
-        const detections = detectorRef.current.detectForVideo(video, startTimeMs);
-
+        // Draw video frame first
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Then detect and draw boxes
+        const startTimeMs = performance.now();
+        const detections = detectorRef.current.detectForVideo(video, startTimeMs);
 
         setFaceCount(detections.detections.length);
 
@@ -106,6 +108,7 @@ export default function FaceDetection() {
             }
         });
 
+        // Continue the loop
         animationFrameRef.current = requestAnimationFrame(detectFaces);
     };
 
