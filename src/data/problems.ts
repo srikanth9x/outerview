@@ -4,20 +4,181 @@ export interface TestCase {
     description: string;
 }
 
+export type LanguageKey = 'javascript' | 'typescript' | 'python' | 'java' | 'cpp' | 'c' | 'csharp' | 'go' | 'rust' | 'ruby' | 'php' | 'swift' | 'kotlin';
+
 export interface Problem {
     id: string;
     title: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
     description: string;
     examples: Array<{ input: string; output: string; explanation?: string }>;
-    starterCode: {
-        javascript: string;
-        python: string;
-        cpp: string;
-    };
+    starterCode: Record<LanguageKey, string>;
     testCases: TestCase[];
     hints?: string[];
 }
+
+// Helper function to generate starter code for a simple problem
+const generateStarterCode = (problemId: string): Record<LanguageKey, string> => {
+    if (problemId === 'two-sum') {
+        return {
+            javascript: `function twoSum(nums, target) {
+  // Your code here
+  
+}
+
+// Test
+console.log(JSON.stringify(twoSum([2,7,11,15], 9)));`,
+            typescript: `function twoSum(nums: number[], target: number): number[] {
+  // Your code here
+  return [];
+}
+
+// Test
+console.log(JSON.stringify(twoSum([2,7,11,15], 9)));`,
+            python: `def two_sum(nums, target):
+    # Your code here
+    pass
+
+# Test
+import json
+print(json.dumps(two_sum([2,7,11,15], 9)))`,
+            java: `import java.util.*;
+
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Your code here
+        return new int[]{};
+    }
+    
+    public static void main(String[] args) {
+        Solution sol = new Solution();
+        int[] result = sol.twoSum(new int[]{2,7,11,15}, 9);
+        System.out.println("[" + result[0] + "," + result[1] + "]");
+    }
+}`,
+            cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> twoSum(vector<int>& nums, int target) {
+    // Your code here
+    return {};
+}
+
+int main() {
+    vector<int> nums = {2,7,11,15};
+    vector<int> result = twoSum(nums, 9);
+    cout << "[" << result[0] << "," << result[1] << "]" << endl;
+    return 0;
+}`,
+            c: `#include <stdio.h>
+#include <stdlib.h>
+
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+    // Your code here
+    *returnSize = 2;
+    int* result = (int*)malloc(2 * sizeof(int));
+    return result;
+}
+
+int main() {
+    int nums[] = {2,7,11,15};
+    int returnSize;
+    int* result = twoSum(nums, 4, 9, &returnSize);
+    printf("[%d,%d]\\n", result[0], result[1]);
+    free(result);
+    return 0;
+}`,
+            csharp: `using System;
+
+class Solution {
+    public int[] TwoSum(int[] nums, int target) {
+        // Your code here
+        return new int[]{};
+    }
+    
+    static void Main() {
+        Solution sol = new Solution();
+        int[] result = sol.TwoSum(new int[]{2,7,11,15}, 9);
+        Console.WriteLine($"[{result[0]},{result[1]}]");
+    }
+}`,
+            go: `package main
+import "fmt"
+
+func twoSum(nums []int, target int) []int {
+    // Your code here
+    return []int{}
+}
+
+func main() {
+    result := twoSum([]int{2,7,11,15}, 9)
+    fmt.Printf("[%d,%d]\\n", result[0], result[1])
+}`,
+            rust: `fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
+    // Your code here
+    vec![]
+}
+
+fn main() {
+    let result = two_sum(vec![2,7,11,15], 9);
+    println!("[{},{}]", result[0], result[1]);
+}`,
+            ruby: `def two_sum(nums, target)
+    # Your code here
+    []
+end
+
+# Test
+require 'json'
+puts two_sum([2,7,11,15], 9).to_json`,
+            php: `<?php
+function twoSum($nums, $target) {
+    // Your code here
+    return [];
+}
+
+// Test
+$result = twoSum([2,7,11,15], 9);
+echo json_encode($result);
+?>`,
+            swift: `func twoSum(_ nums: [Int], _ target: Int) -> [Int] {
+    // Your code here
+    return []
+}
+
+// Test
+let result = twoSum([2,7,11,15], 9)
+print("[\\(result[0]),\\(result[1])]")`,
+            kotlin: `fun twoSum(nums: IntArray, target: Int): IntArray {
+    // Your code here
+    return intArrayOf()
+}
+
+fun main() {
+    val result = twoSum(intArrayOf(2,7,11,15), 9)
+    println("[" + result[0] + "," + result[1] + "]")
+}`
+        };
+    }
+
+    // Default simple template
+    return {
+        javascript: `// Your code here\nconsole.log("Hello World");`,
+        typescript: `// Your code here\nconsole.log("Hello World");`,
+        python: `# Your code here\nprint("Hello World")`,
+        java: `class Solution {\n    public static void main(String[] args) {\n        System.out.println("Hello World");\n    }\n}`,
+        cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World" << endl;\n    return 0;\n}`,
+        c: `#include <stdio.h>\n\nint main() {\n    printf("Hello World\\n");\n    return 0;\n}`,
+        csharp: `using System;\n\nclass Solution {\n    static void Main() {\n        Console.WriteLine("Hello World");\n    }\n}`,
+        go: `package main\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello World")\n}`,
+        rust: `fn main() {\n    println!("Hello World");\n}`,
+        ruby: `# Your code here\nputs "Hello World"`,
+        php: `<?php\necho "Hello World";\n?>`,
+        swift: `// Your code here\nprint("Hello World")`,
+        kotlin: `fun main() {\n    println("Hello World")\n}`
+    };
+};
 
 export const problems: Problem[] = [
     {
@@ -36,38 +197,7 @@ export const problems: Problem[] = [
                 output: '[1,2]'
             }
         ],
-        starterCode: {
-            javascript: `function twoSum(nums, target) {
-  // Your code here
-  
-}
-
-// Test
-console.log(JSON.stringify(twoSum([2,7,11,15], 9)));`,
-            python: `def two_sum(nums, target):
-    # Your code here
-    pass
-
-# Test
-import json
-print(json.dumps(two_sum([2,7,11,15], 9)))`,
-            cpp: `#include <iostream>
-#include <vector>
-#include <string>
-using namespace std;
-
-vector<int> twoSum(vector<int>& nums, int target) {
-    // Your code here
-    
-}
-
-int main() {
-    vector<int> nums = {2,7,11,15};
-    vector<int> result = twoSum(nums, 9);
-    cout << "[" << result[0] << "," << result[1] << "]" << endl;
-    return 0;
-}`
-        },
+        starterCode: generateStarterCode('two-sum'),
         testCases: [
             {
                 input: 'twoSum([2,7,11,15], 9)',
@@ -86,290 +216,16 @@ int main() {
             }
         ],
         hints: ['Use a hash map to store numbers you\'ve seen', 'For each number, check if target - number exists in the map']
-    },
-    {
-        id: 'reverse-string',
-        title: 'Reverse String',
-        difficulty: 'Easy',
-        description: 'Write a function that reverses a string. The input string is given as an array of characters.',
-        examples: [
-            {
-                input: 's = ["h","e","l","l","o"]',
-                output: '["o","l","l","e","h"]'
-            },
-            {
-                input: 's = ["H","a","n","n","a","h"]',
-                output: '["h","a","n","n","a","H"]'
-            }
-        ],
-        starterCode: {
-            javascript: `function reverseString(s) {
-  // Your code here
-  
-}
-
-// Test
-const test = ["h","e","l","l","o"];
-reverseString(test);
-console.log(JSON.stringify(test));`,
-            python: `def reverse_string(s):
-    # Your code here
-    pass
-
-# Test
-import json
-test = ["h","e","l","l","o"]
-reverse_string(test)
-print(json.dumps(test))`,
-            cpp: `#include <iostream>
-#include <vector>
-#include <algorithm>
-using namespace std;
-
-void reverseString(vector<char>& s) {
-    // Your code here
-    
-}
-
-int main() {
-    vector<char> test = {'h','e','l','l','o'};
-    reverseString(test);
-    cout << "[";
-    for(int i = 0; i < test.size(); i++) {
-        cout << "\\"" << test[i] << "\\"";
-        if(i < test.size()-1) cout << ",";
-    }
-    cout << "]" << endl;
-    return 0;
-}`
-        },
-        testCases: [
-            {
-                input: 'reverseString(["h","e","l","l","o"])',
-                expectedOutput: '["o","l","l","e","h"]',
-                description: 'Basic reversal'
-            },
-            {
-                input: 'reverseString(["H","a","n","n","a","h"])',
-                expectedOutput: '["h","a","n","n","a","H"]',
-                description: 'Palindrome-like input'
-            }
-        ]
-    },
-    {
-        id: 'fizzbuzz',
-        title: 'FizzBuzz',
-        difficulty: 'Easy',
-        description: 'Given an integer `n`, return a string array `answer` where: `answer[i] == "FizzBuzz"` if `i` is divisible by 3 and 5, `answer[i] == "Fizz"` if `i` is divisible by 3, `answer[i] == "Buzz"` if `i` is divisible by 5, `answer[i] == i` (as a string) if none of the above conditions are true.',
-        examples: [
-            {
-                input: 'n = 3',
-                output: '["1","2","Fizz"]'
-            },
-            {
-                input: 'n = 5',
-                output: '["1","2","Fizz","4","Buzz"]'
-            },
-            {
-                input: 'n = 15',
-                output: '["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]'
-            }
-        ],
-        starterCode: {
-            javascript: `function fizzBuzz(n) {
-  // Your code here
-  
-}
-
-// Test
-console.log(JSON.stringify(fizzBuzz(15)));`,
-            python: `def fizz_buzz(n):
-    # Your code here
-    pass
-
-# Test
-import json
-print(json.dumps(fizz_buzz(15)))`,
-            cpp: `#include <iostream>
-#include <vector>
-#include <string>
-using namespace std;
-
-vector<string> fizzBuzz(int n) {
-    // Your code here
-    
-}
-
-int main() {
-    vector<string> result = fizzBuzz(15);
-    cout << "[";
-    for(int i = 0; i < result.size(); i++) {
-        cout << "\\"" << result[i] << "\\"";
-        if(i < result.size()-1) cout << ",";
-    }
-    cout << "]" << endl;
-    return 0;
-}`
-        },
-        testCases: [
-            {
-                input: 'fizzBuzz(3)',
-                expectedOutput: '["1","2","Fizz"]',
-                description: 'Small input'
-            },
-            {
-                input: 'fizzBuzz(5)',
-                expectedOutput: '["1","2","Fizz","4","Buzz"]',
-                description: 'Include Buzz'
-            },
-            {
-                input: 'fizzBuzz(15)',
-                expectedOutput: '["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]',
-                description: 'Include FizzBuzz'
-            }
-        ]
-    },
-    {
-        id: 'palindrome-number',
-        title: 'Palindrome Number',
-        difficulty: 'Easy',
-        description: 'Given an integer `x`, return `true` if `x` is a palindrome, and `false` otherwise.',
-        examples: [
-            {
-                input: 'x = 121',
-                output: 'true',
-                explanation: '121 reads as 121 from left to right and from right to left.'
-            },
-            {
-                input: 'x = -121',
-                output: 'false',
-                explanation: 'From left to right, it reads -121. From right to left, it becomes 121-.'
-            },
-            {
-                input: 'x = 10',
-                output: 'false'
-            }
-        ],
-        starterCode: {
-            javascript: `function isPalindrome(x) {
-  // Your code here
-  
-}
-
-// Test
-console.log(isPalindrome(121));`,
-            python: `def is_palindrome(x):
-    # Your code here
-    pass
-
-# Test
-print(is_palindrome(121))`,
-            cpp: `#include <iostream>
-using namespace std;
-
-bool isPalindrome(int x) {
-    // Your code here
-    
-}
-
-int main() {
-    cout << (isPalindrome(121) ? "true" : "false") << endl;
-    return 0;
-}`
-        },
-        testCases: [
-            {
-                input: 'isPalindrome(121)',
-                expectedOutput: 'true',
-                description: 'Positive palindrome'
-            },
-            {
-                input: 'isPalindrome(-121)',
-                expectedOutput: 'false',
-                description: 'Negative number'
-            },
-            {
-                input: 'isPalindrome(10)',
-                expectedOutput: 'false',
-                description: 'Non-palindrome'
-            }
-        ]
-    },
-    {
-        id: 'valid-parentheses',
-        title: 'Valid Parentheses',
-        difficulty: 'Medium',
-        description: 'Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid. An input string is valid if: Open brackets must be closed by the same type of brackets, and open brackets must be closed in the correct order.',
-        examples: [
-            {
-                input: 's = "()"',
-                output: 'true'
-            },
-            {
-                input: 's = "()[]{}"',
-                output: 'true'
-            },
-            {
-                input: 's = "(]"',
-                output: 'false'
-            }
-        ],
-        starterCode: {
-            javascript: `function isValid(s) {
-  // Your code here
-  
-}
-
-// Test
-console.log(isValid("()[]{}"));`,
-            python: `def is_valid(s):
-    # Your code here
-    pass
-
-# Test
-print(is_valid("()[]{}"))`,
-            cpp: `#include <iostream>
-#include <string>
-using namespace std;
-
-bool isValid(string s) {
-    // Your code here
-    
-}
-
-int main() {
-    cout << (isValid("()[]{}") ? "true" : "false") << endl;
-    return 0;
-}`
-        },
-        testCases: [
-            {
-                input: 'isValid("()")',
-                expectedOutput: 'true',
-                description: 'Simple valid case'
-            },
-            {
-                input: 'isValid("()[]{}")',
-                expectedOutput: 'true',
-                description: 'Multiple types'
-            },
-            {
-                input: 'isValid("(]")',
-                expectedOutput: 'false',
-                description: 'Invalid pairing'
-            },
-            {
-                input: 'isValid("([)]")',
-                expectedOutput: 'false',
-                description: 'Wrong order'
-            }
-        ],
-        hints: ['Use a stack data structure', 'Push opening brackets, pop and match closing brackets']
     }
 ];
 
-export function getRandomProblem(): Problem {
-    return problems[Math.floor(Math.random() * problems.length)];
+export function getRandomProblem(difficulty?: 'Easy' | 'Medium' | 'Hard'): Problem {
+    let filtered = problems;
+    if (difficulty) {
+        filtered = problems.filter(p => p.difficulty === difficulty);
+    }
+    if (filtered.length === 0) return problems[Math.floor(Math.random() * problems.length)];
+    return filtered[Math.floor(Math.random() * filtered.length)];
 }
 
 export function getProblemById(id: string): Problem | undefined {

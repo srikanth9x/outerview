@@ -2,33 +2,43 @@
 import React, { useState, useEffect } from 'react';
 import CodeEditor from '@/components/CodeEditor';
 import Timer from '@/components/Timer';
-import { getGroqFeedback } from '@/lib/groq';
-import { Play, Lightbulb, Loader2, Sparkles, CheckCircle2, XCircle, RotateCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { getGroqFeedback, generateProblem } from '@/lib/groq';
+import { Play, Lightbulb, Loader2, Sparkles, RotateCw, ChevronDown, ChevronUp, BrainCircuit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
-import { getRandomProblem, Problem } from '@/data/problems';
-import { validateCode, generateTestCode, ValidationResult } from '@/lib/testRunner';
+import { getRandomProblem, Problem, LanguageKey } from '@/data/problems';
+import { validateCode, ValidationResult } from '@/lib/testRunner';
 import { saveSession } from '@/lib/sessionStore';
 
-type Language = 'javascript' | 'python' | 'cpp';
-
-const languageConfig = {
+const languageConfig: Record<LanguageKey, { label: string; pistonLang: string }> = {
     javascript: { label: 'JavaScript', pistonLang: 'javascript' },
+    typescript: { label: 'TypeScript', pistonLang: 'typescript' },
     python: { label: 'Python', pistonLang: 'python' },
-    cpp: { label: 'C++', pistonLang: 'cpp' }
+    java: { label: 'Java', pistonLang: 'java' },
+    cpp: { label: 'C++', pistonLang: 'cpp' },
+    c: { label: 'C', pistonLang: 'c' },
+    csharp: { label: 'C#', pistonLang: 'csharp' },
+    go: { label: 'Go', pistonLang: 'go' },
+    rust: { label: 'Rust', pistonLang: 'rust' },
+    ruby: { label: 'Ruby', pistonLang: 'ruby' },
+    php: { label: 'PHP', pistonLang: 'php' },
+    swift: { label: 'Swift', pistonLang: 'swift' },
+    kotlin: { label: 'Kotlin', pistonLang: 'kotlin' },
 };
 
 export default function Coding() {
     const [problem, setProblem] = useState<Problem | null>(null);
-    const [selectedLanguage, setSelectedLanguage] = useState<Language>('javascript');
+    const [selectedLanguage, setSelectedLanguage] = useState<LanguageKey>('javascript');
     const [code, setCode] = useState('');
     const [feedback, setFeedback] = useState('');
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
+    const [isGeneratingProblem, setIsGeneratingProblem] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
     const [activeTab, setActiveTab] = useState<'description' | 'hints'>('description');
     const [consoleExpanded, setConsoleExpanded] = useState(true);
     const [startTime, setStartTime] = useState<number>(Date.now());
+    const [difficultyLevel, setDifficultyLevel] = useState<'Easy' | 'Medium' | 'Hard'>('Easy');
 
     useEffect(() => {
         loadNewProblem();
@@ -36,12 +46,12 @@ export default function Coding() {
 
     useEffect(() => {
         if (problem) {
-            setCode(problem.starterCode[selectedLanguage]);
+            setCode(problem.starterCode[selectedLanguage] || '// No starter code available for this language');
         }
     }, [selectedLanguage, problem]);
 
     const loadNewProblem = () => {
-        const newProblem = getRandomProblem();
+        const newProblem = getRandomProblem(difficultyLevel);
         setProblem(newProblem);
         setCode(newProblem.starterCode[selectedLanguage]);
         setValidationResult(null);
@@ -49,18 +59,45 @@ export default function Coding() {
         setStartTime(Date.now());
     };
 
+    const handleGenerateAIProblem = async () => {
+        setIsGeneratingProblem(true);
+        try {
+            const newProblem = await generateProblem(difficultyLevel);
+            if (newProblem) {
+                // Ensure starterCode has all keys or fallback
+                const completeStarterCode = { ...newProblem.starterCode };
+                // Simple fill for missing languages if needed, or just let it be empty
+                setProblem({ ...newProblem, id: `ai-${Date.now()}` });
+                setCode(newProblem.starterCode[selectedLanguage] || '');
+                setValidationResult(null);
+                setFeedback('');
+                setStartTime(Date.now());
+            } else {
+                alert("Failed to generate problem. Try again.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error generating problem");
+        } finally {
+            setIsGeneratingProblem(false);
+        }
+    };
+
+    // Reload problem when difficulty changes (optional, but good for UX)
+    useEffect(() => {
+        loadNewProblem();
+    }, [difficultyLevel]);
+
+
     const handleRunTests = async () => {
         if (!problem) return;
-
         setIsRunning(true);
         setValidationResult(null);
         setConsoleExpanded(true);
-
         try {
             const pistonLang = languageConfig[selectedLanguage].pistonLang;
             const result = await validateCode(code, problem.testCases, pistonLang);
             setValidationResult(result);
-
             const timeSpent = Math.floor((Date.now() - startTime) / 1000);
             saveSession({
                 problemId: problem.id,
@@ -70,11 +107,10 @@ export default function Coding() {
                 passed: result.allPassed,
                 passedTests: result.passedCount,
                 totalTests: result.totalCount,
-                timeSpent
+                timeSpent,
             });
-
-        } catch (error) {
-            console.error('Test execution error:', error);
+        } catch (e) {
+            console.error(e);
         } finally {
             setIsRunning(false);
         }
@@ -82,16 +118,14 @@ export default function Coding() {
 
     const handleGetFeedback = async () => {
         if (!problem) return;
-
         setIsGettingFeedback(true);
-        setFeedback("");
-
+        setFeedback('');
         try {
             const context = `Problem: ${problem.title}\n\nDescription: ${problem.description}\n\nDifficulty: ${problem.difficulty}\n\nLanguage: ${languageConfig[selectedLanguage].label}`;
             const result = await getGroqFeedback(code, context);
             setFeedback(result);
-        } catch (error) {
-            setFeedback("Error getting feedback. Make sure GROQ_API_KEY is set in .env");
+        } catch (e) {
+            setFeedback('Error getting feedback.');
         } finally {
             setIsGettingFeedback(false);
         }
@@ -106,44 +140,92 @@ export default function Coding() {
     }
 
     return (
-        <div className="h-[calc(100vh-5rem)] flex flex-col">
+        <div className="h-[calc(100vh-9rem)] flex flex-col border border-gray-700 rounded-xl overflow-hidden bg-gray-900/30 backdrop-blur-sm">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-gray-700 bg-gray-900/50 backdrop-blur-sm shrink-0">
+            <div className="relative flex items-center justify-between px-6 py-3 border-b border-gray-700 bg-gray-900/50 backdrop-blur-sm shrink-0">
                 <div className="flex items-center gap-4">
-                    <h1 className="text-xl font-bold text-white">{problem.title}</h1>
-                    <span className={clsx(
-                        "px-2 py-1 rounded text-xs font-semibold",
-                        problem.difficulty === 'Easy' && "bg-green-900/30 text-green-400 border border-green-700",
-                        problem.difficulty === 'Medium' && "bg-yellow-900/30 text-yellow-400 border border-yellow-700",
-                        problem.difficulty === 'Hard' && "bg-red-900/30 text-red-400 border border-red-700"
-                    )}>
-                        {problem.difficulty}
-                    </span>
+                    <h1 className="text-xl font-bold text-white max-w-[200px] truncate" title={problem.title}>{problem.title}</h1>
+
+                    {/* Difficulty Buttons */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setDifficultyLevel('Easy')}
+                            className={clsx(
+                                "px-3 py-1 rounded text-xs font-bold border-2 transition-all",
+                                difficultyLevel === 'Easy'
+                                    ? "bg-green-500 text-black border-green-600 shadow-[0_0_10px_rgba(34,197,94,0.4)]"
+                                    : "bg-green-900/20 text-green-500 border-green-900/50 hover:bg-green-900/40"
+                            )}
+                        >
+                            EASY
+                        </button>
+                        <button
+                            onClick={() => setDifficultyLevel('Medium')}
+                            className={clsx(
+                                "px-3 py-1 rounded text-xs font-bold border-2 transition-all",
+                                difficultyLevel === 'Medium'
+                                    ? "bg-yellow-500 text-black border-yellow-600 shadow-[0_0_10px_rgba(234,179,8,0.4)]"
+                                    : "bg-yellow-900/20 text-yellow-500 border-yellow-900/50 hover:bg-yellow-900/40"
+                            )}
+                        >
+                            MEDIUM
+                        </button>
+                        <button
+                            onClick={() => setDifficultyLevel('Hard')}
+                            className={clsx(
+                                "px-3 py-1 rounded text-xs font-bold border-2 transition-all",
+                                difficultyLevel === 'Hard'
+                                    ? "bg-red-500 text-black border-red-600 shadow-[0_0_10px_rgba(239,68,68,0.4)]"
+                                    : "bg-red-900/20 text-red-500 border-red-900/50 hover:bg-red-900/40"
+                            )}
+                        >
+                            HARD
+                        </button>
+                    </div>
 
                     {/* Language Selector */}
                     <select
                         value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value as Language)}
+                        onChange={(e) => setSelectedLanguage(e.target.value as LanguageKey)}
                         className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded text-sm text-white font-medium hover:bg-gray-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        {Object.entries(languageConfig).map(([key, config]) => (
-                            <option key={key} value={key}>
-                                {config.label}
-                            </option>
+                        {Object.entries(languageConfig).map(([key, cfg]) => (
+                            <option key={key} value={key}>{cfg.label}</option>
                         ))}
                     </select>
                 </div>
-                <div className="flex items-center gap-3">
+
+                {/* Centered Timer */}
+                {/* Timer */}
+                <div>
                     <Timer />
+                </div>
+
+                <div className="flex items-center gap-3">
+                    {/* AI Generate Button */}
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleGenerateAIProblem}
+                        disabled={isGeneratingProblem}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm text-white font-medium transition-colors disabled:opacity-50"
+                        title="Generate a new problem with AI"
+                    >
+                        {isGeneratingProblem ? <Loader2 size={14} className="animate-spin" /> : <BrainCircuit size={14} />}
+                        AI Problem
+                    </motion.button>
+
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={loadNewProblem}
                         className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white font-medium transition-colors"
+                        title="Load a random existing problem"
                     >
                         <RotateCw size={14} />
                         New Problem
                     </motion.button>
+
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -154,6 +236,7 @@ export default function Coding() {
                         {isGettingFeedback ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                         AI Feedback
                     </motion.button>
+
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -169,7 +252,7 @@ export default function Coding() {
 
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden">
-                {/* Left Panel - Problem Description */}
+                {/* Left Panel */}
                 <div className="w-1/2 border-r border-gray-700 flex flex-col bg-gray-900/30">
                     {/* Tabs */}
                     <div className="flex gap-1 px-4 pt-3 border-b border-gray-700/50">
@@ -198,7 +281,6 @@ export default function Coding() {
                             </button>
                         )}
                     </div>
-
                     {/* Content */}
                     <div className="flex-1 overflow-y-auto p-6">
                         <AnimatePresence mode="wait">
@@ -210,47 +292,34 @@ export default function Coding() {
                                     exit={{ opacity: 0 }}
                                     className="space-y-6"
                                 >
-                                    <div className="text-gray-300 leading-relaxed">
-                                        {problem.description}
-                                    </div>
-
+                                    <div className="text-gray-300 leading-relaxed">{problem.description}</div>
                                     <div className="space-y-4">
                                         <h3 className="text-white font-semibold">Examples:</h3>
-                                        {problem.examples.map((example, idx) => (
-                                            <div key={idx} className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                                                <div className="text-xs text-gray-500 mb-2">Example {idx + 1}:</div>
+                                        {problem.examples.map((ex, i) => (
+                                            <div key={i} className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                                                <div className="text-xs text-gray-500 mb-2">Example {i + 1}:</div>
                                                 <div className="font-mono text-sm space-y-1">
-                                                    <div>
-                                                        <span className="text-gray-400">Input:</span>{' '}
-                                                        <span className="text-blue-400">{example.input}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-gray-400">Output:</span>{' '}
-                                                        <span className="text-green-400">{example.output}</span>
-                                                    </div>
-                                                    {example.explanation && (
+                                                    <div><span className="text-gray-400">Input:</span> <span className="text-blue-400">{ex.input}</span></div>
+                                                    <div><span className="text-gray-400">Output:</span> <span className="text-green-400">{ex.output}</span></div>
+                                                    {ex.explanation && (
                                                         <div className="text-gray-400 text-xs mt-2 pt-2 border-t border-gray-700">
-                                                            <strong>Explanation:</strong> {example.explanation}
+                                                            <strong>Explanation:</strong> {ex.explanation}
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-
                                     {feedback && (
                                         <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4">
                                             <div className="flex items-center gap-2 mb-2 text-purple-400 font-semibold">
                                                 <Sparkles size={16} /> AI Feedback
                                             </div>
-                                            <div className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">
-                                                {feedback}
-                                            </div>
+                                            <div className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{feedback}</div>
                                         </div>
                                     )}
                                 </motion.div>
                             )}
-
                             {activeTab === 'hints' && problem.hints && (
                                 <motion.div
                                     key="hints"
@@ -260,9 +329,9 @@ export default function Coding() {
                                     className="space-y-3"
                                 >
                                     <h3 className="text-white font-semibold mb-4">Hints:</h3>
-                                    {problem.hints.map((hint, idx) => (
-                                        <div key={idx} className="bg-yellow-900/10 border border-yellow-700/30 rounded-lg p-4">
-                                            <div className="text-yellow-400 text-sm font-medium mb-1">Hint {idx + 1}</div>
+                                    {problem.hints.map((hint, i) => (
+                                        <div key={i} className="bg-yellow-900/10 border border-yellow-700/30 rounded-lg p-4">
+                                            <div className="text-yellow-400 text-sm font-medium mb-1">Hint {i + 1}</div>
                                             <div className="text-gray-300 text-sm">{hint}</div>
                                         </div>
                                     ))}
@@ -271,25 +340,22 @@ export default function Coding() {
                         </AnimatePresence>
                     </div>
                 </div>
-
-                {/* Right Panel - Code Editor & Console */}
-                <div className="w-1/2 flex flex-col">
+                {/* Right Panel */}
+                <div className="w-1/2 flex flex-col gap-4 p-4">
                     {/* Code Editor */}
                     <div className={clsx(
-                        "transition-all duration-300 border-b border-gray-700",
+                        "transition-all duration-300 border-2 border-black rounded-lg overflow-hidden bg-gray-900/50 backdrop-blur-sm",
                         consoleExpanded ? "h-[60%]" : "flex-1"
                     )}>
                         <CodeEditor code={code} onChange={(val) => setCode(val || "")} />
                     </div>
-
                     {/* Console Output */}
                     <div className={clsx(
-                        "bg-gray-900 flex flex-col transition-all duration-300",
+                        "flex flex-col transition-all duration-300 border border-gray-700 rounded-lg overflow-hidden bg-gray-900/50 backdrop-blur-sm",
                         consoleExpanded ? "h-[40%]" : "h-12"
                     )}>
-                        {/* Console Header */}
                         <div
-                            className="flex items-center justify-between px-4 py-2 border-b border-gray-700 cursor-pointer hover:bg-gray-800/50"
+                            className="flex items-center justify-between px-4 py-2 border-b border-gray-700 bg-gray-800/30 cursor-pointer hover:bg-gray-800/50"
                             onClick={() => setConsoleExpanded(!consoleExpanded)}
                         >
                             <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
@@ -305,8 +371,6 @@ export default function Coding() {
                             </div>
                             {consoleExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                         </div>
-
-                        {/* Console Content */}
                         <AnimatePresence>
                             {consoleExpanded && (
                                 <motion.div
@@ -318,49 +382,14 @@ export default function Coding() {
                                     {!validationResult && !isRunning && (
                                         <div className="text-gray-500 text-sm">Run your code to see test results...</div>
                                     )}
-
                                     {isRunning && (
                                         <div className="flex items-center gap-3 text-green-400">
                                             <Loader2 size={20} className="animate-spin" />
                                             <span className="text-sm">Running tests...</span>
                                         </div>
                                     )}
-
                                     {validationResult && (
-                                        <div className="space-y-3">
-                                            {validationResult.results.map((result, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className={clsx(
-                                                        "p-3 rounded-lg border text-sm",
-                                                        result.passed
-                                                            ? "bg-green-900/10 border-green-800/50"
-                                                            : "bg-red-900/10 border-red-800/50"
-                                                    )}
-                                                >
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        {result.passed ? (
-                                                            <CheckCircle2 size={16} className="text-green-500" />
-                                                        ) : (
-                                                            <XCircle size={16} className="text-red-500" />
-                                                        )}
-                                                        <span className="font-medium text-gray-300">{result.description}</span>
-                                                    </div>
-
-                                                    {!result.passed && (
-                                                        <div className="ml-6 space-y-1 text-xs font-mono">
-                                                            <div className="text-gray-400">
-                                                                Expected: <span className="text-green-400">{result.expected}</span>
-                                                            </div>
-                                                            <div className="text-gray-400">
-                                                                Got: <span className="text-red-400">{result.actual || 'No output'}</span>
-                                                            </div>
-                                                            {result.error && <div className="text-red-400 mt-1">{result.error}</div>}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
+                                        <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(validationResult, null, 2)}</pre>
                                     )}
                                 </motion.div>
                             )}

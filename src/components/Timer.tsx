@@ -8,9 +8,7 @@ export default function Timer() {
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
         if (isRunning) {
-            interval = setInterval(() => {
-                setSeconds(s => s + 1);
-            }, 1000);
+            interval = setInterval(() => setSeconds(s => s + 1), 1000);
         }
         return () => {
             if (interval) clearInterval(interval);
@@ -24,17 +22,17 @@ export default function Timer() {
     };
 
     return (
-        <div className="flex items-center gap-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
-            <div className="text-2xl font-mono text-blue-400">{formatTime(seconds)}</div>
+        <div className="flex items-center gap-2 h-8 px-2 bg-gray-800 rounded-md border border-gray-700">
+            <div className="text-sm font-mono text-blue-400">{formatTime(seconds)}</div>
             <button
                 onClick={() => setIsRunning(!isRunning)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 rounded text-xs text-white transition-colors"
             >
                 {isRunning ? 'Pause' : 'Start'}
             </button>
             <button
                 onClick={() => { setSeconds(0); setIsRunning(false); }}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-md transition-colors"
+                className="px-2 py-0.5 bg-gray-600 hover:bg-gray-700 rounded text-xs text-white transition-colors"
             >
                 Reset
             </button>
