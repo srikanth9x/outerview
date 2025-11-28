@@ -4,19 +4,28 @@ import Timer from '@/components/Timer';
 import FaceDetection from '@/components/FaceDetection';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
 import { getCommunicationFeedback } from '@/lib/communicationFeedback';
-import { Mic, Video, VideoOff, MessageSquare, Sparkles, Trash2, AlertCircle } from 'lucide-react';
+import { Mic, Video, VideoOff, MessageSquare, Sparkles, Trash2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
-const QUESTION = "Tell me about a time when you had to debug a critical production issue. How did you approach it, and what was the outcome?";
+const QUESTIONS = [
+    "Tell me about a time when you had to debug a critical production issue. How did you approach it, and what was the outcome?",
+    "Describe a situation where you had to disagree with a team member. How did you handle it?",
+    "Tell me about a time you failed. What did you learn from it?",
+    "Give an example of a goal you reached and tell me how you achieved it.",
+    "Describe a time when you had to manage conflicting priorities."
+];
 
 export default function Communication() {
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isRecording, setIsRecording] = useState(false);
     const { isListening, transcript, startListening, stopListening, resetTranscript, hasRecognition, error } = useSpeechToText();
     const [showCamera, setShowCamera] = useState(true);
     const [feedback, setFeedback] = useState('');
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
     const transcriptEndRef = useRef<HTMLDivElement>(null);
+
+    const currentQuestion = QUESTIONS[currentQuestionIndex];
 
     // Auto-scroll to bottom of transcript
     useEffect(() => {
@@ -41,7 +50,7 @@ export default function Communication() {
 
         setIsGettingFeedback(true);
         try {
-            const result = await getCommunicationFeedback(QUESTION, transcript);
+            const result = await getCommunicationFeedback(currentQuestion, transcript);
             setFeedback(result);
         } catch (e) {
             console.error("Error fetching feedback:", e);
@@ -52,6 +61,18 @@ export default function Communication() {
     };
 
     const handleClearTranscript = () => {
+        resetTranscript();
+        setFeedback('');
+    };
+
+    const handleNextQuestion = () => {
+        setCurrentQuestionIndex((prev) => (prev + 1) % QUESTIONS.length);
+        resetTranscript();
+        setFeedback('');
+    };
+
+    const handlePrevQuestion = () => {
+        setCurrentQuestionIndex((prev) => (prev - 1 + QUESTIONS.length) % QUESTIONS.length);
         resetTranscript();
         setFeedback('');
     };
@@ -121,16 +142,46 @@ export default function Communication() {
 
                     {/* Question Card - Compact */}
                     <div className="bg-gray-900/90 backdrop-blur-md p-5 rounded-2xl border border-gray-700/50 shadow-lg shrink-0">
-                        <div className="flex items-center gap-2 mb-2 text-blue-400">
-                            <MessageSquare size={16} />
-                            <span className="text-xs font-bold uppercase tracking-wider">Current Question</span>
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 text-blue-400">
+                                <MessageSquare size={16} />
+                                <span className="text-xs font-bold uppercase tracking-wider">Question {currentQuestionIndex + 1} of {QUESTIONS.length}</span>
+                            </div>
+                            <div className="flex gap-1">
+                                <button
+                                    onClick={handlePrevQuestion}
+                                    className="p-1 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
+                                    title="Previous Question"
+                                >
+                                    <ChevronLeft size={18} />
+                                </button>
+                                <button
+                                    onClick={handleNextQuestion}
+                                    className="p-1 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
+                                    title="Next Question"
+                                >
+                                    <ChevronRight size={18} />
+                                </button>
+                            </div>
                         </div>
-                        <p className="text-lg font-medium text-white leading-snug mb-3">
-                            {QUESTION}
-                        </p>
+
+                        <div className="min-h-[80px] flex items-center">
+                            <AnimatePresence mode="wait">
+                                <motion.p
+                                    key={currentQuestionIndex}
+                                    initial={{ opacity: 0, x: 10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="text-lg font-medium text-white leading-snug"
+                                >
+                                    {currentQuestion}
+                                </motion.p>
+                            </AnimatePresence>
+                        </div>
 
                         {/* STAR Method Chips */}
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 mt-3">
                             {['Situation', 'Task', 'Action', 'Result'].map((step, i) => (
                                 <div key={step} className="flex-1 bg-gray-800/50 rounded px-2 py-1 text-center border border-gray-700/50">
                                     <div className="text-[10px] text-gray-500 uppercase font-bold">Step {i + 1}</div>
