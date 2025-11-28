@@ -1,6 +1,11 @@
 import React from 'react';
 
-export default function Editor({ code, onChange }) {
+interface EditorProps {
+    code: string;
+    onChange: (value: string) => void;
+}
+
+export default function SimpleEditor({ code, onChange }: EditorProps) {
     return (
         <div className="w-full h-full">
             <textarea
