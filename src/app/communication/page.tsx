@@ -22,13 +22,13 @@ export default function Communication() {
     };
 
     return (
-        <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
+        <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col py-6 px-6">
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center justify-between shrink-0"
             >
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-white">
                     Communication Practice
                 </h1>
                 <Timer />
@@ -42,17 +42,17 @@ export default function Communication() {
                     transition={{ delay: 0.1 }}
                     className="flex flex-col gap-6 h-full overflow-auto"
                 >
-                    <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shrink-0 shadow-lg relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                    <div className="bg-gray-900/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shrink-0 shadow-lg relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-white"></div>
                         <h2 className="text-xl font-semibold mb-2 text-white flex items-center gap-2">
-                            <MessageSquare size={20} className="text-green-400" /> Behavioral Question
+                            <MessageSquare size={20} className="text-gray-400" /> Behavioral Question
                         </h2>
                         <p className="text-gray-200 mb-4 text-lg font-medium leading-relaxed">
                             "Tell me about a time when you had to debug a critical production issue.
                             How did you approach it, and what was the outcome?"
                         </p>
-                        <div className="text-sm text-gray-400 bg-gray-900/50 p-3 rounded border border-gray-700/50">
-                            <strong className="text-green-400">STAR Method Tip:</strong> Structure your answer:
+                        <div className="text-sm text-gray-400 bg-black/30 p-3 rounded border border-gray-700/50">
+                            <strong className="text-white">STAR Method Tip:</strong> Structure your answer:
                             <span className="text-gray-300"> Situation → Task → Action → Result</span>
                         </div>
                     </div>
@@ -102,8 +102,8 @@ export default function Communication() {
                     transition={{ delay: 0.2 }}
                     className="flex flex-col gap-6 h-full"
                 >
-                    <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl border border-gray-700 flex flex-col items-center justify-center shrink-0 shadow-lg relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-900/10 to-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="bg-gray-900/50 backdrop-blur-sm p-8 rounded-xl border border-gray-700 flex flex-col items-center justify-center shrink-0 shadow-lg relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-gray-800/10 to-gray-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                         <div className="mb-6 relative z-10">
                             <AnimatePresence mode="wait">
@@ -118,10 +118,10 @@ export default function Communication() {
                                         <motion.div
                                             animate={{ scale: [1, 1.2, 1] }}
                                             transition={{ repeat: Infinity, duration: 1.5 }}
-                                            className="absolute inset-0 bg-red-500/30 rounded-full blur-xl"
+                                            className="absolute inset-0 bg-white/20 rounded-full blur-xl"
                                         />
-                                        <div className="w-24 h-24 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.5)] relative z-10">
-                                            <Mic size={32} className="text-white" />
+                                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] relative z-10">
+                                            <Mic size={32} className="text-black" />
                                         </div>
                                     </motion.div>
                                 ) : (
@@ -145,25 +145,25 @@ export default function Communication() {
                             onClick={toggleRecording}
                             disabled={!hasRecognition}
                             className={`relative z-10 px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 shadow-lg ${isListening
-                                    ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-500/30'
-                                    : 'bg-green-600 hover:bg-green-700 text-white shadow-green-500/30'
+                                ? 'bg-white hover:bg-gray-200 text-black shadow-white/30'
+                                : 'bg-gray-800 hover:bg-gray-700 text-white shadow-gray-800/30 border border-gray-600'
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {isListening ? 'Stop Recording' : 'Start Recording'}
                         </motion.button>
 
                         {!hasRecognition && (
-                            <p className="text-red-400 text-sm mt-4">Speech recognition not supported in this browser.</p>
+                            <p className="text-gray-400 text-sm mt-4">Speech recognition not supported in this browser.</p>
                         )}
                     </div>
 
-                    <div className="flex-1 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 flex flex-col shadow-lg">
-                        <h3 className="text-lg font-semibold mb-3 text-blue-400 flex items-center gap-2">
+                    <div className="flex-1 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 flex flex-col shadow-lg">
+                        <h3 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
                             <span>Live Transcript</span>
                             {isListening && (
                                 <span className="flex h-3 w-3 relative">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                                 </span>
                             )}
                         </h3>
@@ -188,3 +188,5 @@ export default function Communication() {
         </div>
     );
 }
+// remove the get started and login button for now 
+// and also on the practive button open it at a random coding/problem page 

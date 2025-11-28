@@ -2,17 +2,36 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { BorderBeam } from '@/components/ui/border-beam';
+import { useState } from 'react';
 
 const navItems = [
-    { name: 'Practice', path: '/practice' },
     { name: 'Coding', path: '/coding' },
     { name: 'Communication', path: '/communication' },
 ];
 
 export default function Navbar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const [isLoadingProblem, setIsLoadingProblem] = useState(false);
+
+    const handlePracticeClick = async () => {
+        setIsLoadingProblem(true);
+        try {
+            const response = await fetch('https://alfa-leetcode-api.onrender.com/problems?limit=100');
+            const data = await response.json();
+            if (data.problemsetQuestionList && data.problemsetQuestionList.length > 0) {
+                const randomIndex = Math.floor(Math.random() * data.problemsetQuestionList.length);
+                const randomSlug = data.problemsetQuestionList[randomIndex].titleSlug;
+                router.push(`/coding/${randomSlug}`);
+            }
+        } catch (error) {
+            console.error('Error fetching random problem:', error);
+        } finally {
+            setIsLoadingProblem(false);
+        }
+    };
 
     return (
         <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 pointer-events-none">
@@ -31,6 +50,13 @@ export default function Navbar() {
                 <div className="h-4 w-[1px] bg-white/10 relative z-10" />
 
                 <div className="flex items-center gap-6 relative z-10">
+                    <button
+                        onClick={handlePracticeClick}
+                        disabled={isLoadingProblem}
+                        className="text-sm font-medium transition-colors hover:text-white text-muted-foreground disabled:opacity-50"
+                    >
+                        {isLoadingProblem ? 'Loading...' : 'Practice'}
+                    </button>
                     {navItems.map((item) => (
                         <Link
                             key={item.path}
@@ -41,17 +67,6 @@ export default function Navbar() {
                             {item.name}
                         </Link>
                     ))}
-                </div>
-
-                <div className="h-4 w-[1px] bg-white/10 relative z-10" />
-
-                <div className="flex items-center gap-4 relative z-10">
-                    <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
-                        Login
-                    </Link>
-                    <Link href="/signup" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
-                        Get Started
-                    </Link>
                 </div>
             </motion.nav>
         </div>
