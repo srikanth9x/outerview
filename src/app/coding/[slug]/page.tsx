@@ -45,6 +45,8 @@ export default function CodingPage() {
     const [activeTab, setActiveTab] = useState<'description' | 'hints'>('description');
     const [consoleExpanded, setConsoleExpanded] = useState(true);
     const [startTime, setStartTime] = useState<number>(Date.now());
+    const [revealedHints, setRevealedHints] = useState<number>(0);
+
 
     // For navigation
     const [problemList, setProblemList] = useState<ProblemSummary[]>([]);
@@ -88,6 +90,8 @@ export default function CodingPage() {
                 setValidationResult(null);
                 setFeedback('');
                 setStartTime(Date.now());
+                setRevealedHints(0);
+
             }
         } catch (e) {
             console.error(e);
@@ -306,7 +310,7 @@ export default function CodingPage() {
                                     )}
                                 </motion.div>
                             )}
-                            {activeTab === 'hints' && problem.hints && (
+                            {activeTab === 'hints' && (
                                 <motion.div
                                     key="hints"
                                     initial={{ opacity: 0 }}
@@ -314,13 +318,50 @@ export default function CodingPage() {
                                     exit={{ opacity: 0 }}
                                     className="space-y-3"
                                 >
-                                    <h3 className="text-white font-semibold mb-4">Hints:</h3>
-                                    {problem.hints.map((hint, i) => (
-                                        <div key={i} className="bg-yellow-900/10 border border-yellow-700/30 rounded-lg p-4">
-                                            <div className="text-yellow-400 text-sm font-medium mb-1">Hint {i + 1}</div>
-                                            <div className="text-gray-300 text-sm">{hint}</div>
+                                    {!problem.hints || problem.hints.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                            <p className="text-lg">No hints available for this problem</p>
+                                            <p className="text-sm mt-2">Try solving it on your own!</p>
                                         </div>
-                                    ))}
+                                    ) : (
+                                        <>
+                                            <h3 className="text-white font-semibold mb-4">
+                                                Hints ({problem.hints.length} available)
+                                            </h3>
+
+                                            {/* Revealed Hints */}
+                                            {problem.hints.slice(0, revealedHints).map((hint, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="bg-gray-800/50 border border-gray-700 rounded-lg p-4"
+                                                >
+                                                    <div className="text-gray-400 text-sm font-medium mb-2">Hint {i + 1}</div>
+                                                    <div className="text-gray-300 text-sm leading-relaxed">{hint}</div>
+                                                </motion.div>
+                                            ))}
+
+                                            {/* Show Next Hint Button */}
+                                            {revealedHints < problem.hints.length && (
+                                                <motion.button
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={() => setRevealedHints(revealedHints + 1)}
+                                                    className="w-full py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-white font-medium transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    <span>Show Hint {revealedHints + 1}</span>
+                                                </motion.button>
+                                            )}
+
+                                            {/* All Hints Revealed Message */}
+                                            {revealedHints === problem.hints.length && revealedHints > 0 && (
+                                                <div className="text-center text-gray-500 text-sm py-2 border-t border-gray-800 mt-2 pt-4">
+                                                    All hints revealed
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>

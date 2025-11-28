@@ -3,6 +3,10 @@ import { Problem, LanguageKey } from '@/data/problems';
 
 const API_BASE_URL = 'https://alfa-leetcode-api.onrender.com';
 
+// Simple delay function for rate limiting
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+
 interface LeetCodeProblem {
     questionFrontendId: string;
     questionTitle?: string;
@@ -183,10 +187,21 @@ interface ProblemListResponse {
 
 export const fetchProblemList = async (limit: number = 50, skip: number = 0): Promise<ProblemSummary[]> => {
     try {
+        // Add a small delay to avoid rate limiting
+        if (skip > 0) {
+            await delay(500); // 500ms delay between paginated requests
+        }
+
         const response = await axios.get<ProblemListResponse>(`${API_BASE_URL}/problems?limit=${limit}&skip=${skip}`);
         return response.data.problemsetQuestionList;
-    } catch (error) {
+    } catch (error: any) {
+        if (error.response?.status === 429) {
+            console.error('Rate limit exceeded. Please wait before making more requests.');
+            // Return empty array instead of throwing to prevent app crash
+            return [];
+        }
         console.error('Error fetching problem list:', error);
         return [];
     }
 };
+
