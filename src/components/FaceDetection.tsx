@@ -2,7 +2,11 @@
 import { useEffect, useRef, useState } from "react";
 import * as faceapi from 'face-api.js';
 
-export default function FaceDetection() {
+interface FaceDetectionProps {
+    onConfidenceUpdate?: (confidence: number) => void;
+}
+
+export default function FaceDetection({ onConfidenceUpdate }: FaceDetectionProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isActive, setIsActive] = useState(false);
@@ -193,7 +197,11 @@ export default function FaceDetection() {
                     const totalScore = (emotionScore * 0.4) + (attentionScore * 0.3) + (stabilityScore * 0.3);
                     console.log("Total score:", totalScore);
 
-                    setConfidenceScore(prev => Math.round(prev * 0.9 + totalScore * 0.1));
+                    setConfidenceScore(prev => {
+                        const newScore = Math.round(prev * 0.9 + totalScore * 0.1);
+                        onConfidenceUpdate?.(newScore);
+                        return newScore;
+                    });
 
                     // Generate Feedback
                     const newFeedback = [];
