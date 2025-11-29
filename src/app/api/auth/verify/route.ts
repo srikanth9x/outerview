@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getUser, verifyPassword } from '@/lib/userDb';
 
+// Force Node.js runtime for filesystem operations
+export const runtime = 'nodejs';
+
 export async function POST(request: Request) {
     try {
         const { email, password } = await request.json();
