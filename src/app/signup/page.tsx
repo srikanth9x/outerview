@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, UserPlus, AlertCircle, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
@@ -58,27 +59,36 @@ export default function SignupPage() {
                 body: JSON.stringify({ name, email, password })
             });
 
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                console.error('JSON parse error:', jsonError);
+                setError('Server error. Please try again.');
+                return;
+            }
 
             if (!response.ok) {
                 setError(data.error || 'Failed to create account');
                 return;
             }
 
-            // Auto-login after signup
-            const signInResponse = await fetch('/api/auth/signin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+            // Auto-login after signup using NextAuth
+            const result = await signIn('credentials', {
+                email,
+                password,
+                redirect: false
             });
 
-            if (signInResponse.ok) {
+            if (result?.error) {
+                // If auto-login fails, redirect to login page
+                router.push('/login');
+            } else {
                 router.push('/');
                 router.refresh();
-            } else {
-                router.push('/login');
             }
         } catch (err) {
+            console.error('Signup error:', err);
             setError('An error occurred. Please try again.');
         } finally {
             setLoading(false);
