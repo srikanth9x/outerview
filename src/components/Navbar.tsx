@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
 import { BorderBeam } from '@/components/ui/border-beam';
 import { useState } from 'react';
+import { signOut, useSession } from 'next-auth/react';
+import { LogOut, User } from 'lucide-react';
 
 const navItems = [
     { name: 'Coding', path: '/coding' },
@@ -14,6 +16,7 @@ const navItems = [
 export default function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
+    const { data: session } = useSession();
     const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
     const handlePracticeClick = async () => {
@@ -31,6 +34,10 @@ export default function Navbar() {
         } finally {
             setIsLoadingProblem(false);
         }
+    };
+
+    const handleLogout = async () => {
+        await signOut({ callbackUrl: '/login' });
     };
 
     return (
@@ -68,6 +75,27 @@ export default function Navbar() {
                         </Link>
                     ))}
                 </div>
+
+                {session?.user && (
+                    <>
+                        <div className="h-4 w-[1px] bg-white/10 relative z-10" />
+
+                        <div className="flex items-center gap-3 relative z-10">
+                            <div className="flex items-center gap-2 text-sm text-gray-300">
+                                <User size={16} />
+                                <span>{session.user.name}</span>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
+                                title="Logout"
+                            >
+                                <LogOut size={16} />
+                                Logout
+                            </button>
+                        </div>
+                    </>
+                )}
             </motion.nav>
         </div>
     );
