@@ -141,7 +141,6 @@ export default function SignupPage() {
                                     onChange={(e) => setName(e.target.value)}
                                     required
                                     className="w-full pl-11 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="John Doe"
                                 />
                             </div>
                         </div>
@@ -160,7 +159,6 @@ export default function SignupPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="w-full pl-11 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="you@example.com"
                                 />
                             </div>
                         </div>
@@ -179,7 +177,6 @@ export default function SignupPage() {
                                     onChange={(e) => handlePasswordChange(e.target.value)}
                                     required
                                     className="w-full pl-11 pr-12 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
@@ -220,7 +217,6 @@ export default function SignupPage() {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
                                     className="w-full pl-11 pr-12 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="••••••••"
                                 />
                                 <button
                                     type="button"

@@ -20,7 +20,7 @@ export default function Communication() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isRecording, setIsRecording] = useState(false);
     const { isListening, transcript, startListening, stopListening, resetTranscript, hasRecognition, error } = useSpeechToText();
-    const [showCamera, setShowCamera] = useState(true);
+    const [showCamera, setShowCamera] = useState(false);
     const [feedback, setFeedback] = useState('');
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
     const transcriptEndRef = useRef<HTMLDivElement>(null);
@@ -43,6 +43,21 @@ export default function Communication() {
             setIsRecording(true);
             setFeedback(''); // Clear previous feedback
         }
+    };
+
+    const handleInterviewStart = () => {
+        setShowCamera(true);
+        startListening();
+        setIsRecording(true);
+        setFeedback('');
+    };
+
+    const handleInterviewEnd = () => {
+        setShowCamera(false);
+        if (isListening) {
+            stopListening();
+        }
+        setIsRecording(false);
     };
 
     const handleGetFeedback = async () => {
@@ -87,7 +102,6 @@ export default function Communication() {
                         Communication Practice
                     </h1>
                 </div>
-                <Timer />
             </div>
 
             <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -193,7 +207,11 @@ export default function Communication() {
                 </div>
 
                 {/* Right Column: Transcript & Controls (7 cols) */}
-                <div className="lg:col-span-7 flex flex-col h-full min-h-0 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden relative">
+                <div className="lg:col-span-7 flex flex-col h-full min-h-0 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-xl overflow-visible relative">
+                    {/* Timer floating above, aligned right */}
+                    <div className="absolute -top-[3.75rem] right-4 z-20">
+                        <Timer onStart={handleInterviewStart} onEnd={handleInterviewEnd} />
+                    </div>
                     {/* Transcript Header */}
                     <div className="h-14 px-6 border-b border-gray-700/50 flex items-center justify-between bg-gray-800/30 shrink-0">
                         <div className="flex items-center gap-2 text-gray-200 font-medium">

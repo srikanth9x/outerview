@@ -1,7 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
-export default function Timer() {
+interface TimerProps {
+    onStart?: () => void;
+    onEnd?: () => void;
+}
+
+export default function Timer({ onStart, onEnd }: TimerProps) {
     const [seconds, setSeconds] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
 
@@ -21,20 +26,36 @@ export default function Timer() {
         return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
     };
 
+    const handleStartStop = () => {
+        if (!isRunning) {
+            setIsRunning(true);
+            onStart?.();
+        } else {
+            setIsRunning(false);
+            onEnd?.();
+        }
+    };
+
+    const handleEnd = () => {
+        setSeconds(0);
+        setIsRunning(false);
+        onEnd?.();
+    };
+
     return (
-        <div className="flex items-center gap-2 h-8 px-2 bg-gray-800 rounded-md border border-gray-700">
-            <div className="text-sm font-mono text-blue-400">{formatTime(seconds)}</div>
+        <div className="flex items-center gap-3 px-4 py-2 bg-gray-900/90 backdrop-blur-md rounded-xl border border-gray-700/50 shadow-lg">
+            <div className="text-lg font-mono text-blue-400 font-semibold">{formatTime(seconds)}</div>
             <button
-                onClick={() => setIsRunning(!isRunning)}
-                className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 rounded text-xs text-white transition-colors"
+                onClick={handleStartStop}
+                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm text-white font-medium transition-colors"
             >
-                {isRunning ? 'Pause' : 'Start'}
+                {isRunning ? 'Pause' : 'Start Interview'}
             </button>
             <button
-                onClick={() => { setSeconds(0); setIsRunning(false); }}
-                className="px-2 py-0.5 bg-gray-600 hover:bg-gray-700 rounded text-xs text-white transition-colors"
+                onClick={handleEnd}
+                className="px-4 py-1.5 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm text-white font-medium transition-colors"
             >
-                Reset
+                End
             </button>
         </div>
     );

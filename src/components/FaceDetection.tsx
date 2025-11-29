@@ -278,14 +278,6 @@ export default function FaceDetection({ onConfidenceUpdate }: FaceDetectionProps
                     </div>
                 </div>
             )}
-
-            {/* Debug Overlay */}
-            {isActive && (
-                <div className="absolute top-4 right-4 z-10 bg-black/50 p-2 rounded text-xs text-green-400 font-mono">
-                    <p>Debug Info:</p>
-                    <p>Score: {confidenceScore}</p>
-                </div>
-            )}
         </div>
     );
 }
