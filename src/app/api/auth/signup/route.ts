@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
         if (!user) {
             return NextResponse.json(
-                { error: 'Email already exists' },
+                { error: 'Email is already connected to an account' },
                 { status: 409 }
             );
         }

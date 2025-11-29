@@ -39,26 +39,31 @@ function saveUsers(users: User[]) {
 }
 
 export async function createUser(email: string, password: string, name: string): Promise<User | null> {
-    const users = getUsers();
+    try {
+        const users = getUsers();
 
-    // Check if user already exists
-    if (users.find(u => u.email === email)) {
-        return null;
+        // Check if user already exists
+        if (users.find(u => u.email === email)) {
+            return null;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user: User = {
+            id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            email,
+            name,
+            password: hashedPassword,
+            createdAt: Date.now()
+        };
+
+        users.push(user);
+        saveUsers(users);
+
+        return user;
+    } catch (error) {
+        console.error('Error creating user:', error);
+        throw error; // Re-throw to let the API route handle it
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user: User = {
-        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        email,
-        name,
-        password: hashedPassword,
-        createdAt: Date.now()
-    };
-
-    users.push(user);
-    saveUsers(users);
-
-    return user;
 }
 
 export function getUser(email: string): User | null {
