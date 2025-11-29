@@ -51,6 +51,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const isOnLoginPage = nextUrl.pathname.startsWith('/login');
             const isOnSignupPage = nextUrl.pathname.startsWith('/signup');
 
+            console.log('Auth Debug:', {
+                isLoggedIn,
+                path: nextUrl.pathname,
+                hasUser: !!auth?.user,
+                hasSecret: !!process.env.AUTH_SECRET
+            });
+
             if (isOnLoginPage || isOnSignupPage) {
                 if (isLoggedIn) {
                     return Response.redirect(new URL('/', nextUrl));
