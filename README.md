@@ -1,3 +1,11 @@
+This Web App [Outerview](https://outerview.vercel.app) is a platform for job seekers to prepare for job interviews.
+
+Outerview is a web application built using Next.js, React, and Tailwind CSS. It provides a user-friendly interface for job seekers to create and manage their job applications.
+
+Outerview is built at hackathon named [ZIGNASA](https://zignasa2K25.in/) held at [M.L.R. Institute of Technology](https://mlrit.ac.in/).
+
+Built by [Alahad](https://github.com/bubbles-jp), [Koushik](https://github.com/Koushik-dev2007), [Navya](https://github.com/navyalugalapu), [Pooja](https://github.com/kalerupooja179-stack), [Srikanth](https://github.com/srikanth9x).
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
